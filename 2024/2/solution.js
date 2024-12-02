@@ -35,7 +35,6 @@ const ensureSafe = (report) => {
         dir = "DECR";
       }
     } else {
-      console.error("SHould this be happening");
       return false;
     }
     lastElement = element;
@@ -47,8 +46,16 @@ const getSafeReports = (reports) => {
   var safeReports = [];
   for (const report of reports) {
     if (ensureSafe(report)) {
-      console.log("Safe %s", report);
       safeReports.push(report);
+    } else {
+      for (let i = 0; i < report.length; i++) {
+        var tempCopy = [...report]
+        tempCopy.splice(i, 1);
+        if (ensureSafe(tempCopy)) {
+          safeReports.push(tempCopy);
+          break;
+        }
+      }
     }
   }
   
