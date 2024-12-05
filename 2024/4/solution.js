@@ -17,8 +17,6 @@ const vecDiagU = new SearchVector("diagU", -1, 1)
 
 const rowRegEx = /.+/g
 
-var debug = [];
-
 const makeRows = (text) => {
   return text.match(rowRegEx);
 }
@@ -39,53 +37,17 @@ const safeGet = (rows, rowPos, colPos) => {
   }
 }
 
-const getXStrings = (rows, x, y) => {
-  const combos = [];
-
-  const both = (a, b) => {
-    combos.push([a, b]);
-    combos.push([b, a]);
-  }
-  const tL = safeGet(rows, y-1, x-1);
-  const tR = safeGet(rows, y-1, x+1);
-  const bL = safeGet(rows, y+1, x-1);
-  const bR = safeGet(rows, y+1, x+1);
-
-  both(tL, bR);
-  both(bL, tR);
-
-  return combos.map((c)=> c[0] + "A" + c[1]);
-}
-
-const findMasXes = (rows) => {
-  var found = 0;
-  for (let y = 1; y < rows.length - 1; y++) {
-    const row = rows[y];
-    for (let x = 1; x < row.length - 1; x++) {
-      const letter = row.at(x);
-      if (letter == "A") {
-        parseXes(x, y);
-      }
-    }
-  }
-  return found;
-}
-
 const searchInDirAt = (rows, string, x, y, {rowDir, colDir}) => {
-  var dbg = [];
   var found = 0;
   for (let i = 0; i < string.length; i++) {
     const letter = string.at(i);
     const rowPos = i * rowDir + x;
     const colPos = i * colDir + y;
     var checkLetter = safeGet(rows, rowPos, colPos);
-    dbg.push(checkLetter);
     if (checkLetter != letter) {
-      debug.push(dbg.join(""));
       return false;
     }
   }
-  debug.push(dbg.join(""));
   return true;
 }
 
@@ -108,9 +70,9 @@ const findXMases = (rows) => {
 
   const getChunk = (row, col) => {
     const chunk = [];
-    chunk.push(rows[row-1].slice(col-2, col + 1));
+    chunk.push(rows[row-1].slice(col-1, col + 2));
     chunk.push(rows[row].slice(col-1, col + 2));
-    chunk.push(rows[row + 1].slice(col, col + 3));
+    chunk.push(rows[row + 1].slice(col-1, col + 2));
     return chunk;
   }
 
@@ -156,13 +118,11 @@ const secondTask = (text) => {
   console.log("Second: %d", xMases);
 }
 
-fs.readFile('./2024/4/test.txt', 'utf-8',
+fs.readFile('./2024/4/input.txt', 'utf-8',
   (err, text) => {
     if (err) {
       console.error(err);
     }
     firstTask(text);
-    debug = [];
     secondTask(text);
-    console.debug(debug);
   })
