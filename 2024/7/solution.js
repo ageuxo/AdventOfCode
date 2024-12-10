@@ -28,9 +28,13 @@ const generateTriCombos = (x) => {
       combo.push(states[value % 3]);
       value = Math.floor(value / 3);
     }
-    combos.push(combo);
+    if (combo.length > 0 && !(combo.length == 1 && combo[0] == CON_OP)) {
+      combos.push(combo);
+    }
   }
-  return combos;
+  if (combos.length > 0) {
+    return combos;
+  }
 }
 
 const parseEqs = (text) => {
@@ -58,7 +62,7 @@ const mul = (a, b) => {
 }
 
 const con = (a, b) => {
-  return [a, b].join("");
+  return parseInt([a, b].join(""));
 }
 
 const debugEquation = (eq, combo) => {
@@ -72,20 +76,6 @@ const debugEquation = (eq, combo) => {
     }
   }
   console.log(strings.join(" "))
-}
-
-const concatValues = (eq, combo) => {
-  const parse = [...eq.values];
-  const parsed = [];
-  for (let i = 1; i < combo.length; i++) {
-    if (combo[i-1] == CON_OP) {
-       const conVals = parse.splice(0, 2);
-       parsed.push(conVals.join(""));
-    } else {
-      parsed.push(parse.shift());
-    }
-  }
-  return parsed;
 }
 
 const tryBoolCombos = (eqs) => {
@@ -114,28 +104,72 @@ const tryBoolCombos = (eqs) => {
   return passed;
 }
 
-const tryTriCombos = (eqs, combos) => {
-  const passed = [];
-  for (const eq of eqs) {
-    var {values} = eq;
-    for (const combo of combos) {
-      var result = values[0];
-      for (let i = 0; i < combo.length; i++) {
-        const num = values[i + 1];
-        var op = combo[i]
-        if (op == ADD_OP) {
-          result = add(result, num);
-        } else  if (op == MUL_OP) {
-          result = mul(result, num);
-        } else if (op == CON_OP) {
+const flatten = (eq, combo) => {
+  const vals = [...eq.values];
+  const flatValues = [];
+  const flatCombo = [];
+  while (combo.length > 0) {
+    const op = combo.shift();
+    var flatValue;
+    if (op == CON_OP) {
+      const a = vals.shift();
+      const b = vals.shift();
+      flatValue = con(a, b);
+    } else {
+      flatCombo.push(op);
+      flatValue = vals.shift();
+    }
+    flatValues.push(flatValue);
+  }
 
+  if (flatCombo.length > 0 && flatValues.length > 1) {
+    return {
+      product: eq.product,
+      values: [...flatValues],
+      flatCombo: flatCombo
+    }
+  }
+}
+
+const makeFlatEqCombosArrs = (eqs) => {
+  const eqCombos = [];
+  for (let i = 0; i < eqs.length; i++) {
+    const eq = eqs[i];
+    const combos = generateTriCombos(eq.values.length - 1);
+    const flattenedEqs = [];
+    for (let j = 0; j < combos.length; j++) {
+      const eq = eqs[i];
+      const combo = combos[j];
+      const flattened = flatten(eq, combo);
+      if (flattened) {
+        flattenedEqs.push(flattened);
+      }
+    }
+    if (flattenedEqs.length > 0) {
+      eqCombos.push([...flattenedEqs])
+    };
+  }
+  return eqCombos;
+}
+
+const tryTriCombos = (eqs) => {
+  const eqCombosArrs = makeFlatEqCombosArrs(eqs);
+  const passed = [];
+  for (const arr of eqCombosArrs) {
+    combo: for (const eqCombo of arr) {
+      const {product, values, flatCombo} = eqCombo;
+      var result = values[0];
+      for (let i = 0; i < flatCombo.length; i++) {
+        const num = values[i + 1];
+        if (flatCombo[i]) {
+          result = add(result, num);
+        } else {
+          result = mul(result, num);
         }
       }
-      if (result == eq.product) {
-        passed.push([eq, combo]);
-        break;
-      } else if (result < eq.product) {
-        continue;
+      if (result == product) {
+        passed.push([eqCombo, flatCombo]);
+        break combo;
       }
     }
   }
@@ -159,16 +193,11 @@ const firstTask = (text) => {
 
 const secondTask = (text) => {
   const eqs = parseEqs(text);
-  const combos = generateTriCombos(eqs.length);
-  const finalEqs = [];
-  for (const eq of eqs) {
-    finalEqs.push(concatValues(eq, combos[i]));
-  }
-  const passed = tryTriCombos(finalEqs, combos);
+  const passed = tryTriCombos(eqs);
   console.log("Second: %d", sumResults(passed));
 }
 
-fs.readFile('./2024/7/input.txt', 'utf-8',
+fs.readFile('./2024/7/test.txt', 'utf-8',
   (err, text) => {
     if (err) {
       console.error(err);
