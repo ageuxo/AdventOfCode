@@ -5,6 +5,42 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch 7",
+            "program": "${workspaceFolder}/2024/7/solution.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "name": "Launch 6",
+            "program": "${workspaceFolder}/2024/6/solution.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "name": "Launch 5",
+            "program": "${workspaceFolder}/2024/5/solution.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "name": "Launch 4",
+            "program": "${workspaceFolder}/2024/4/solution.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
             "name": "Attach",
             "port": 9229,
             "request": "attach",
@@ -14,7 +50,7 @@
             "type": "node"
         },
         {
-            "name": "Launch Program",
+            "name": "Launch 2",
             "program": "${workspaceFolder}/2024/2/solution.js",
             "request": "launch",
             "runtimeArgs": ["--inspect", "--nolazy"],
